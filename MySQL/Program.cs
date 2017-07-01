@@ -1,4 +1,4 @@
-﻿using Constellation;
+using Constellation;
 using Constellation.Package;
 using System;
 using System.Collections.Generic;
@@ -49,14 +49,14 @@ public class DBConnect
     {
         server = server_name;
         database = database_name;
-        uid = username;
+        uid = username; 
         psw = password;
         string connectionString;
         connectionString = "SERVER=" + server + ";" + "DATABASE=" +
-        database + ";" + "UID=" + uid + ";" + "PASSWORD=" + psw + ";";
-        status = "disconnected";
+        database + ";" + "UID=" + uid + ";" + "PASSWORD=" + psw + ";"; //Create connection query
+        status = "disconnected"; //Used to know if a connection is open
 
-        connection = new MySqlConnection(connectionString);
+        connection = new MySqlConnection(connectionString); //Initialize connection
     }
 
     /// <summary>
@@ -68,9 +68,9 @@ public class DBConnect
         {
             connection.Open();
             PackageHost.WriteInfo("MySQL server connected");
-            this.status = "connected";
+            this.status = "connected"; //Set status to connected
         }
-        catch (MySqlException ex)
+        catch (MySqlException ex) //Show error number + most common error advice
         {
             PackageHost.WriteInfo(ex.Number);
             this.status = "disconnected";
@@ -100,7 +100,7 @@ public class DBConnect
         {
             connection.Close();
             PackageHost.WriteInfo("MySQL server disconnected");
-            this.status = "disconnected";
+            this.status = "disconnected"; //Set Status to disconnected
         }
         catch (MySqlException ex)
         {
@@ -226,6 +226,7 @@ public class DBConnect
     /// </summary>
     public void Delete(string table, string condition)
     {
+        //Create query
         string query = "DELETE FROM " + table + " WHERE " + condition;
         this.OpenConnection();
         try
@@ -263,7 +264,7 @@ public class DBConnect
                 //Create Mysql Command
                 MySqlCommand cmd = new MySqlCommand(query, connection);
 
-                //ExecuteScalar will return one value
+                //ExecuteScalar will return one value (count query)
                 Count = int.Parse(cmd.ExecuteScalar() + "");
                 PackageHost.WriteInfo("Query succesfull ");
                 PackageHost.WriteInfo(query);
@@ -288,7 +289,7 @@ public class DBConnect
     }
 
     /// <summary>
-    /// Strings to tab.
+    /// Transform a string input into an array of string, used in Select method
     /// </summary>
     /// <param name="s">string wich will be cnovert into a sting array</param>
     /// <returns></returns>
@@ -325,12 +326,14 @@ public class DBConnect
     public string[][] Select(string table, string selection)
     {
         if (selection == "*")
+            //Can't use * in query from constellation
         {
             PackageHost.WriteError("* not supported");
             string[][] taberror = new string[0][];
             return taberror;
         }
-        string[] tab = StringToTab(selection);
+
+        string[] tab = StringToTab(selection); //
         string[][] tabfinal = new string[tab.Length][];
         int i, j;
         int count = this.Count(table);
@@ -369,7 +372,7 @@ public class DBConnect
                 for (i = 0; i < tab.Length; i++)
                 {
                     for (j = 0; j < count; j++)
-                    {                                           //Trouver le moyen de compter le tableau de l'objet
+                    {                
                         tabfinal[i][j] = list[i][j];
                     }
                 }
@@ -405,7 +408,7 @@ namespace MySQL
     public class Program : PackageBase
     {
         /// <summary>
-        /// The database
+        /// database associated to the sentinel
         /// </summary>
         private DBConnect database = new DBConnect("", "", "", "");
 
@@ -426,7 +429,7 @@ namespace MySQL
             //Initialize class database
             database.Initialize(PackageHost.GetSettingValue("server_name"), PackageHost.GetSettingValue("database_name"), PackageHost.GetSettingValue("username"), PackageHost.GetSettingValue("password"));
 
-            database.OpenConnection();
+            database.OpenConnection(); //Test if the connection is working
             database.CloseConnection();
 
         }
@@ -444,13 +447,13 @@ namespace MySQL
         /// <summary>
         /// Updates a statement in a selected line of a table
         /// </summary>
-        /// <param name="table_arg">Name of the table with arguments ex: nomtable(id1,id2)</param>
+        /// <param name="table_noarg">Name of the table ex: nomtable (no arguments necessary here).</param>
         /// <param name="values_change">Values to change separated by a coma ex : name='Joe', age='22'</param>
         /// <param name="condition">Condition to select the statement ex : name='John Smith'</param>
         [MessageCallback]
-        public void Update_DB(string table_arg, string values_change, string condition)
+        public void Update_DB(string table_noarg, string values_change, string condition)
         {
-            database.Update(table_arg, values_change, condition);
+            database.Update(table_noarg, values_change, condition);
         }
 
         /// <summary>
@@ -465,9 +468,9 @@ namespace MySQL
 
         /// <summary>
         /// Deletes the specified table.
-        /// </summary>
+        /// </summary>il
         /// <param name="table_noarg">Name of the table ex: nomtable (no arguments necessary here).</param>
-        /// <param name="condition_del">Condition to select the ligne wich will be deleted ex : name='John Smith'</param>
+        /// <param name="condition_del">Condition to select the ligne wich wl be deleted ex : name='John Smith'</param>
         [MessageCallback]
         public void Delete_DB(string table_noarg, string condition_del)
         {
@@ -486,7 +489,7 @@ namespace MySQL
         }
 
         /// <summary>
-        /// Selects and return different collumn of your choice in a double array
+        /// Selects and return different collumns of your choice in a double array
         /// </summary>
         /// <param name="table_noarg">Name of the table ex: nomtable (no arguments necessary here).</param>
         /// <param name="selection">column needed in a table sepparated by a coma ex : "id1,id2" </param>
